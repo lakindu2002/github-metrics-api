@@ -17,4 +17,5 @@ Therefore, each component has been broken down in its own microservice:
 Apart from that, there are two more services that are built for this app:
 
 1. Scheduler Service: This service will run daily and collect data for a series of users
-2. Consumer Service: This service will expose forward facing endpoints that clients can use to get data from.
+
+An API Gateway will be provisioned to act as the ingress API.
