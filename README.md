@@ -5,8 +5,8 @@ This is a tool that consumes the GitHub Developer API to build a tool that asses
 To do so, this API takes into account the following metrics offered by the GitHub API:
 
 1. Number of Commits Made by a Particular User
-2. Number of Issues Closed by a Particular User
-3. The Time Taken To Review a Pull Request
+2. Number of PRs Closed by a Particular User
+3. Number of Issues Assigned to a Particular User
 
 Therefore, each component has been broken down in its own microservice:
 
