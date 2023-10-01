@@ -12,7 +12,7 @@ export const getCommitsInRepoInOrg = async (
   while (true) {
     try {
       const response = await axios.get<Commit[]>(commitsUrl, {
-        params: { page },
+        params: { page, per_page: 100 },
       });
       const commits = response.data;
       if (response.status !== 200) {

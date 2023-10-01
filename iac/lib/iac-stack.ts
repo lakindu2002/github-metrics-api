@@ -1,0 +1,71 @@
+import * as cdk from "aws-cdk-lib";
+import { Construct } from "constructs";
+
+export class IacStack extends cdk.Stack {
+  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+    super(scope, id, props);
+
+    const pullsTable = new cdk.aws_dynamodb.Table(this, "pulls", {
+      partitionKey: {
+        name: "pk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    pullsTable.addGlobalSecondaryIndex({
+      indexName: "by-username",
+      partitionKey: {
+        name: "username",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "organizationName",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      projectionType: cdk.aws_dynamodb.ProjectionType.ALL,
+    });
+
+    const commitsTable = new cdk.aws_dynamodb.Table(this, "commits", {
+      partitionKey: {
+        name: "pk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    commitsTable.addGlobalSecondaryIndex({
+      indexName: "by-username",
+      partitionKey: {
+        name: "username",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "organizationName",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      projectionType: cdk.aws_dynamodb.ProjectionType.ALL,
+    });
+
+    const issuesTable = new cdk.aws_dynamodb.Table(this, "issues", {
+      partitionKey: {
+        name: "pk",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+    });
+
+    issuesTable.addGlobalSecondaryIndex({
+      indexName: "by-username",
+      partitionKey: {
+        name: "username",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      sortKey: {
+        name: "organizationName",
+        type: cdk.aws_dynamodb.AttributeType.STRING,
+      },
+      projectionType: cdk.aws_dynamodb.ProjectionType.ALL,
+    });
+  }
+}

@@ -13,7 +13,7 @@ export const createClosedPullRequestsPerUserInRepo = async (
   while (true) {
     try {
       const response = await axios.get<Pull[]>(pullRequestsUrl, {
-        params: { state: "closed", page },
+        params: { state: "closed", page, per_page: 100 },
       });
 
       if (response.status !== 200) {

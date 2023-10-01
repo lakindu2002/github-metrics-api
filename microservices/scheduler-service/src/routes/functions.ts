@@ -3,8 +3,6 @@ import { HOST_NAME, PORTS } from "@scheduler/utils";
 import { Request, Response } from "express";
 import { Repository } from "@scheduler/types";
 
-const orgName = "microsoft";
-
 export const getHome = (_req: Request, resp: Response) => {
   return resp.json({ message: "hello world!" });
 };
@@ -14,6 +12,7 @@ export const health = (_req: Request, res: Response) => {
 };
 
 export const commenceSchedule = async (_req: Request, res: Response) => {
+  const orgName = process.env.ORG_NAME;
   const repositoryUrl = `${HOST_NAME}:${PORTS.repository}/repositories/${orgName}`;
 
   // GET Repos Per Org

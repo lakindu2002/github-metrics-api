@@ -10,3 +10,11 @@ export type Pull = {
   };
   userId: string;
 };
+
+export type PullStat = {
+  pk: string;
+  closedPrs: number;
+  organizationName: string;
+  repoName: string;
+  username: string;
+};

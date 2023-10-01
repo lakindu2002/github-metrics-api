@@ -15,3 +15,11 @@ export type Commit = {
   };
   authorId: string;
 };
+
+export type CommitStat = {
+  pk: string;
+  commitCount: number;
+  organizationName: string;
+  repoName: string;
+  username: string;
+};

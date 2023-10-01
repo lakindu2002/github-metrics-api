@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { getHome, health, createCommitsPerUserInRepoInOrg } from "./functions";
+import {
+  getHome,
+  health,
+  createCommitsPerUserInRepoInOrg,
+  getCommitsSummaryPerUsername,
+} from "./functions";
 
 const routes = Router();
 
@@ -8,6 +13,10 @@ routes.get("/health", health);
 routes.post(
   "/commits/:organizationName/:repoName",
   createCommitsPerUserInRepoInOrg
+);
+routes.get(
+  "/commits/:organizationName/:username",
+  getCommitsSummaryPerUsername
 );
 
 export default routes;

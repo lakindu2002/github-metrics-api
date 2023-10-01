@@ -16,6 +16,7 @@ export const getOpenClosedIssuesInRepo = async (
         params: {
           state: "all",
           page,
+          per_page: 100,
         },
       });
 
@@ -40,6 +41,7 @@ export const getOpenClosedIssuesInRepo = async (
         break; // No "next" link in the header, exit the loop
       }
     } catch (error) {
+      console.error(JSON.stringify(error));
       console.error(`Error: ${error.message}`);
       break;
     }

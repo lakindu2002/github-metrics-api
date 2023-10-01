@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { getHome, health, createClosedPullRequestsPerUserInRepoInOrg } from "./functions";
+import {
+  getHome,
+  health,
+  createClosedPullRequestsPerUserInRepoInOrg,
+  getPRSummaryPerUsername,
+} from "./functions";
 
 const routes = Router();
 
@@ -9,5 +14,5 @@ routes.post(
   "/pulls/:organizationName/:repoName",
   createClosedPullRequestsPerUserInRepoInOrg
 );
-
+routes.get("/pulls/:organizationName/:username", getPRSummaryPerUsername);
 export default routes;

@@ -11,3 +11,12 @@ export type Issue = {
   }[];
   state: "open" | "closed";
 };
+
+export type IssueStat = {
+  pk: string;
+  closedIssues: number;
+  openedIssues: number;
+  organizationName: string;
+  repoName: string;
+  username: string;
+};
