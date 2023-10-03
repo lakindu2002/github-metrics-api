@@ -3,10 +3,6 @@ import { Request, Response } from "express";
 import { groupBy } from "lodash";
 import aws from "aws-sdk";
 
-const documentClient = new aws.DynamoDB.DocumentClient({
-  region: process.env.AWS_REGION,
-});
-
 export const getHome = (_req: Request, resp: Response) => {
   return resp.json({ message: "hello world!" });
 };
@@ -19,6 +15,10 @@ export const createClosedPullRequestsPerUserInRepoInOrg = async (
   req: Request,
   res: Response
 ) => {
+  const documentClient = new aws.DynamoDB.DocumentClient({
+    region: process.env.AWS_REGION,
+  });
+
   const { organizationName, repoName } = req.params;
 
   const pulls = await createClosedPullRequestsPerUserInRepo(

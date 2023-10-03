@@ -12,6 +12,7 @@ export const health = (_req: Request, res: Response) => {
 };
 
 export const commenceSchedule = async (_req: Request, res: Response) => {
+  console.log("COMMENCING SCHEDULE");
   const orgName = process.env.ORG_NAME;
   const repositoryUrl = `${HOST_NAME}:${PORTS.repository}/repositories/${orgName}`;
 
@@ -26,13 +27,19 @@ export const commenceSchedule = async (_req: Request, res: Response) => {
     const pullsUrl = `${HOST_NAME}:${PORTS.pulls}/pulls/${orgName}/${name}`;
     const commitsUrl = `${HOST_NAME}:${PORTS.commits}/commits/${orgName}/${name}`;
 
-    await Promise.all([
+    const [issuesResp, pullsResp, commitsResp] = await Promise.all([
       axios.post(issuesUrl),
       axios.post(pullsUrl),
       axios.post(commitsUrl),
     ]);
+
+    const issues = issuesResp.data;
+    const pulls = pullsResp.data;
+    const commits = commitsResp.data;
+
+    console.log({ issues, pulls, commits, time: Date.now() });
   });
   await Promise.all(promises);
 
-  res.json({ status: "COMMENCED" });
+  res.json({ status: "COMPLETED" });
 };
