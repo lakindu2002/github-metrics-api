@@ -18,23 +18,7 @@ export const getDeveloperProductivityByGithubUsername = async (
   const { username } = req.params;
   const orgName = process.env.ORG_NAME;
 
-  const [
-    {
-      data: {
-        commits: { commitCount },
-      },
-    },
-    {
-      data: {
-        issues: { closedIssues, openedIssues },
-      },
-    },
-    {
-      data: {
-        pulls: { closedPrs },
-      },
-    },
-  ] = await Promise.all([
+  const [commitResp, issueResp, pullResp] = await Promise.all([
     axios.get<{ commits: CommitStat }>(
       `${HOST_NAME}:${PORTS.commits}/commits/${orgName}/${username}`
     ),
@@ -45,6 +29,10 @@ export const getDeveloperProductivityByGithubUsername = async (
       `${HOST_NAME}:${PORTS.pulls}/pulls/${orgName}/${username}`
     ),
   ]);
+
+  const { commitCount = 0 } = commitResp.data?.commits || {};
+  const { closedIssues = 0, openedIssues = 0 } = issueResp.data?.issues || {};
+  const { closedPrs = 0 } = pullResp.data?.pulls || {};
 
   const productivity = {
     username,

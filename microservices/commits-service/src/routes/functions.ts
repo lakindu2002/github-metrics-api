@@ -26,7 +26,6 @@ export const createCommitsPerUserInRepoInOrg = async (
   const promises = Object.entries(groupedByAuthor).map(
     async ([userId, commitsPerUser]) => {
       const commitCount = commitsPerUser.length;
-
       await documentClient
         .update({
           TableName: process.env.COMMITS_TABLE,
@@ -87,5 +86,7 @@ export const getCommitsSummaryPerUsername = async (
     })
     .promise();
 
-  res.json({ commits: Items[0] });
+  res.json({
+    commits: Items[0] || { commitCount: 0, organizationName, username },
+  });
 };
