@@ -1,10 +1,5 @@
 # Use an official Node.js runtime as a base image
-FROM node:18
-
-# Set environment variables
-ENV PORT=3002
-ENV COMMITS_TABLE=IacStack-commits8C56C0A9-1E4MUM8XOVMZB
-ENV AWS_REGION=ap-southeast-1
+FROM node:18-alpine3.18
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -19,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE $PORT
+EXPOSE 3002
 
 # Define the command to run your application
 CMD ["npm", "start"]

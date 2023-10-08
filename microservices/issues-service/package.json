@@ -4,7 +4,6 @@
   "description": "A Microservice which hosts GitHub issues information",
   "main": "dist/index.js",
   "scripts": {
-    "prebuild": "tslint -c tslint.json -p tsconfig.json --fix",
     "build": "tsc",
     "prestart": "npm run build",
     "start": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",

@@ -1,9 +1,5 @@
 # Use an official Node.js runtime as a base image
-FROM node:18
-
-# Set environment variables
-ENV PORT=3000
-ENV ORG_NAME=lodash
+FROM node:18-alpine3.18
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -18,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the app runs on
-EXPOSE $PORT
+EXPOSE 3000
 
 # Define the command to run your application
 CMD ["npm", "start"]
