@@ -1,5 +1,5 @@
 # Use an official Node.js runtime as a base image
-FROM --platform=linux/amd64 node:18-alpine3.18
+FROM public.ecr.aws/docker/library/node:current-slim
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
@@ -7,14 +7,13 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-# Install application dependencies (creates a separate layer)
-RUN npm install
+# Install application dependencies and build (creates a separate layer)
+RUN npm install --legacy-peer-deps
 
-# Copy the application code to the working directory
-COPY . .
+COPY dist .
 
 # Expose the port the app runs on
-EXPOSE 3003
+EXPOSE 3002
 
 # Define the command to run your application
-CMD ["npm", "start"]
+CMD ["node", "index.js"]

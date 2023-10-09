@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { groupBy } from "lodash";
 
 export const getHome = (_req: Request, resp: Response) => {
-  return resp.json({ message: "hello world!" });
+  return resp.json({ message: "hello from issues service!" });
 };
 
 export const health = (_req: Request, res: Response) => {

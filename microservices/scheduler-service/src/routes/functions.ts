@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 import { Repository } from "@scheduler/types";
 
 export const getHome = (_req: Request, resp: Response) => {
-  return resp.json({ message: "hello world!" });
+  return resp.json({ message: "hello from schedule service!" });
 };
 
 export const health = (_req: Request, res: Response) => {

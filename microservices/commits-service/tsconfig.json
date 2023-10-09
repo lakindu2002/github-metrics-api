@@ -10,7 +10,6 @@
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"],
-      "@commits/*": ["src/*"]
     }
   },
   "include": ["src/**/*"]

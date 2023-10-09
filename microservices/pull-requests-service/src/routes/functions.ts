@@ -4,7 +4,7 @@ import { groupBy } from "lodash";
 import aws from "aws-sdk";
 
 export const getHome = (_req: Request, resp: Response) => {
-  return resp.json({ message: "hello world!" });
+  return resp.json({ message: "hello from pulls service!" });
 };
 
 export const health = (_req: Request, res: Response) => {

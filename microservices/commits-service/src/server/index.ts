@@ -1,4 +1,4 @@
-import routes from "@commits/routes";
+import routes from "../routes";
 import express from "express";
 
 export class Server {

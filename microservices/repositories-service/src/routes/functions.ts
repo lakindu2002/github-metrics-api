@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { getReposPerOrg } from "@repositories/service";
 
 export const getHome = (_req: Request, resp: Response) => {
-  return resp.json({ message: "hello world!" });
+  return resp.json({ message: "hello from repos service!" });
 };
 
 export const health = (_req: Request, res: Response) => {

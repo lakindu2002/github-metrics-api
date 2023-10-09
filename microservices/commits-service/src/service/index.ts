@@ -1,4 +1,4 @@
-import { Commit } from "@commits/types";
+import { Commit } from "../types";
 import axios from "axios";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

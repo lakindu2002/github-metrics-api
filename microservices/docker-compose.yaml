@@ -1,0 +1,32 @@
+version: "3"
+services:
+  developer_iq_commits:
+    build:
+      context: ./commits-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3002"
+  developer_iq_issues:
+    build:
+      context: ./issues-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3004"
+  developer_iq_pulls:
+    build:
+      context: ./pull-requests-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+  developer_iq_repos:
+    build:
+      context: ./repositories-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+  developer_iq_scheduler:
+    build:
+      context: ./scheduler-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
