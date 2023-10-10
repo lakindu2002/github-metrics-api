@@ -1,18 +1,10 @@
 import { Router } from "express";
-import {
-  getHome,
-  health,
-  createNumberOfIssuesAssignedPerUserInRepo,
-  getIssuesSummaryPerUsername,
-} from "./functions";
+import { getHome, health, ping } from "./functions";
 
 const routes = Router();
 
 routes.get("/", getHome);
 routes.get("/health", health);
-routes.post(
-  "/issues/:organizationName/:repoName",
-  createNumberOfIssuesAssignedPerUserInRepo
-);
-routes.get("/issues/:organizationName/:username", getIssuesSummaryPerUsername);
+routes.get("/ping", ping);
+
 export default routes;

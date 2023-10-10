@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: app
+  name: schedule-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: schedule-service
+  template:
+    metadata:
+      labels:
+        app: schedule-service
+      name: schedule-service
+    spec:
+      containers:
+        - name: repos
+          image: 932055394976.dkr.ecr.ap-southeast-1.amazonaws.com/developer_iq_schedule:latest
+          env:
+            - name: PORT
+              value: "3001"
+            - name: AWS_REGION
+              value: ap-southeast-1
+            - name: ORG_NAME
+              value: lodash
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: app
+  name: schedule-service
+spec:
+  selector:
+    app: schedule-service
+  ports:
+    - port: 3001
+      targetPort: 3001
+      protocol: TCP
+  type: NodePort

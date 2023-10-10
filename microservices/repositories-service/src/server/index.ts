@@ -1,13 +1,21 @@
 import routes from "@repositories/routes";
 import express from "express";
+import amqp from "amqplib";
 
 export class Server {
   private server: express.Express;
+  private reposChannel: amqp.Channel;
 
   constructor() {
     this.server = express();
     this.addMiddleware();
     this.addRoutes();
+  }
+
+  getChannels() {
+    return {
+      repos: this.reposChannel,
+    };
   }
 
   addMiddleware() {
@@ -20,6 +28,14 @@ export class Server {
 
   getServer() {
     return this.server;
+  }
+
+  async startRabbitMq() {
+    const amqpServer = process.env.RABBITMQ_URL;
+    const connection = await amqp.connect(amqpServer);
+    this.reposChannel = await connection.createChannel();
+
+    await this.reposChannel.assertQueue("REPOS");
   }
 
   startServer(port: number = (process.env.PORT as unknown as number) || 3000) {

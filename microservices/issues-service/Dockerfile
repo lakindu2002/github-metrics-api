@@ -1,11 +1,16 @@
 # Use an official Node.js runtime as a base image
-FROM public.ecr.aws/docker/library/node:current-slim
+FROM --platform=linux/amd64 public.ecr.aws/docker/library/node:current-slim
 
 # Set the working directory in the container
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
+
+ENV RABBITMQ_URL=ENV RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/%2F
+ENV AWS_ACCESS_KEY=AKIA5SAWUVKQJJMI66PG
+ENV AWS_SECRET_ACCESS=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
+ENV ISSUES_TABLE=IacStackDynamoStackE396051D-issuesA71BD65A-TKGCQUI40GJD
 
 # Install application dependencies and build (creates a separate layer)
 RUN npm install --legacy-peer-deps

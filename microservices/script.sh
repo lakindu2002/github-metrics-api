@@ -47,3 +47,13 @@ npm i --legacy-peer-deps
 
 # Run npm build
 npm run build
+
+cd ..
+
+cd consumer-service
+
+# Run npm install with legacy-peer-deps
+npm i --legacy-peer-deps
+
+# Run npm build
+npm run build

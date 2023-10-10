@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: app
+  name: issues-deployment
+spec:
+  selector:
+    matchLabels:
+      app: issues-service
+  template:
+    metadata:
+      labels:
+        app: issues-service
+      name: issues-service
+    spec:
+      containers:
+        - name: issues
+          image: 932055394976.dkr.ecr.ap-southeast-1.amazonaws.com/developer_iq_issues:latest
+          env:
+            - name: PORT
+              value: "3004"
+            - name: AWS_REGION
+              value: ap-southeast-1
+            - name: ISSUES_TABLE
+              value: IacStackDynamoStackE396051D-issuesA71BD65A-TKGCQUI40GJD
+            - name: ORG_NAME
+              value: lodash
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: app
+  name: issues-service
+spec:
+  selector:
+    app: issues-service
+  ports:
+    - port: 3004
+      targetPort: 3004
+      protocol: TCP
+  type: NodePort
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: app
+  name: issues-deployment-autoscale
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: issues-deployment
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60

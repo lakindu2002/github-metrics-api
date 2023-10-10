@@ -1,5 +1,8 @@
+import server from "@pulls/server";
 import { Pull } from "@pulls/types";
 import axios from "axios";
+import { groupBy } from "lodash";
+const aws = require("aws-sdk");
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -7,7 +10,7 @@ export const createClosedPullRequestsPerUserInRepo = async (
   orgName: string,
   repoName: string
 ): Promise<Pull[]> => {
-  const pullRequestsUrl = `https://api.github.com/repos/${orgName}/${repoName}/pulls`;
+  const pullRequestsUrl = `http://api.github.com/repos/${orgName}/${repoName}/pulls`;
 
   const allClosedPullRequests: Pull[] = [];
   let page = 1;
@@ -73,4 +76,90 @@ export const createClosedPullRequestsPerUserInRepo = async (
       userId: pull.user?.login,
     }))
     .filter((pull) => !!pull.userId);
+};
+
+export const handleCompilePulls = (repoName: string, orgName: string) => {
+  const documentClient = new aws.DynamoDB.DocumentClient({
+    region: process.env.AWS_REGION || "ap-southeast-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS,
+  });
+
+  createClosedPullRequestsPerUserInRepo(orgName, repoName).then(
+    async (pulls) => {
+      const groupedPulls = groupBy(pulls, (pull) => pull.userId);
+
+      const promises = Object.entries(groupedPulls).map(
+        async ([userId, pullRequests]) => {
+          const closedPullRequestCounts = pullRequests.length;
+
+          await documentClient
+            .update({
+              TableName: process.env.PULLS_TABLE,
+              Key: {
+                pk: `${userId}#${orgName.trim().toLowerCase()}#${repoName
+                  .trim()
+                  .toLowerCase()}`,
+              },
+              UpdateExpression:
+                "SET #closedPrs = :closedPrs,  #organizationName = :organizationName, #repoName = :repoName, #username = :username",
+              ExpressionAttributeNames: {
+                "#closedPrs": "closedPrs",
+                "#organizationName": "organizationName",
+                "#repoName": "repoName",
+                "#username": "username",
+              },
+              ExpressionAttributeValues: {
+                ":closedPrs": closedPullRequestCounts,
+                ":organizationName": orgName,
+                ":repoName": repoName,
+                ":username": userId,
+              },
+            })
+            .promise();
+        }
+      );
+
+      await Promise.all(promises);
+    }
+  );
+};
+
+export const handleGetPrSummaryByUsername = async (
+  username: string,
+  organizationName: string,
+  responseQueue: string
+) => {
+  const documentClient = new aws.DynamoDB.DocumentClient({
+    region: process.env.AWS_REGION || "ap-southeast-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS,
+  });
+
+  const { Items = [] } = await documentClient
+    .query({
+      TableName: process.env.PULLS_TABLE,
+      IndexName: "by-username",
+      KeyConditionExpression:
+        "#username = :username AND #organizationName = :organizationName",
+      ExpressionAttributeNames: {
+        "#username": "username",
+        "#organizationName": "organizationName",
+      },
+      ExpressionAttributeValues: {
+        ":username": username,
+        ":organizationName": organizationName,
+      },
+      Limit: 1,
+    })
+    .promise();
+
+  server.getChannels().consumer.sendToQueue(
+    responseQueue,
+    Buffer.from(
+      JSON.stringify({
+        pulls: Items[0] || {},
+      })
+    )
+  );
 };

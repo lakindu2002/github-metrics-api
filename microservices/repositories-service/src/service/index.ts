@@ -1,10 +1,11 @@
+import server from "@repositories/server";
 import { Repository } from "@repositories/types";
 import axios from "axios";
 
 export const getReposPerOrg = async (
   orgName: string
 ): Promise<Repository[]> => {
-  const apiRoute = `https://api.github.com/orgs/${orgName}/repos?type=all&sort=updated&per_page=100`;
+  const apiRoute = `http://api.github.com/orgs/${orgName}/repos?type=all&sort=updated&per_page=100`;
   try {
     const resp = await axios.get<Repository[]>(apiRoute);
     return (resp.data as Repository[]).map((item) => ({
@@ -15,6 +16,20 @@ export const getReposPerOrg = async (
       private: item.private,
     }));
   } catch (err) {
+    console.log("ERROR FETCHING REPOS", err);
     return [];
   }
+};
+
+export const handleGetReposPerOrg = (organizationName: string) => {
+  getReposPerOrg(organizationName).then((repos) => {
+    server
+      .getChannels()
+      .repos.sendToQueue(
+        "REPOS",
+        Buffer.from(JSON.stringify({ repos, type: "REPOS_PER_ORG" }))
+      );
+
+    console.log("PUSHED REPOS TO TOPIC");
+  });
 };

@@ -1,5 +1,8 @@
+import { groupBy } from "lodash";
 import { Commit } from "../types";
 import axios from "axios";
+import server from "../server";
+import aws from "aws-sdk";
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -7,7 +10,7 @@ export const getCommitsInRepoInOrg = async (
   repoName: string,
   organizationName: string
 ): Promise<Commit[]> => {
-  const commitsUrl = `https://api.github.com/repos/${organizationName}/${repoName}/commits`;
+  const commitsUrl = `http://api.github.com/repos/${organizationName}/${repoName}/commits`;
   const allCommits: Commit[] = [];
   let page = 1;
 
@@ -68,4 +71,89 @@ export const getCommitsInRepoInOrg = async (
       authorId: commit.author?.login,
     }))
     .filter((commit) => !!commit.authorId);
+};
+
+export const handleCreateCommits = async (
+  organizationName: string,
+  repoName: string
+) => {
+  const documentClient = new aws.DynamoDB.DocumentClient({
+    region: process.env.AWS_REGION || "ap-southeast-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS,
+  });
+
+  const commits = await getCommitsInRepoInOrg(repoName, organizationName);
+  const groupedByAuthor = groupBy(commits, (commit) => commit.authorId);
+
+  const promises = Object.entries(groupedByAuthor).map(
+    async ([userId, commitsPerUser]) => {
+      const commitCount = commitsPerUser.length;
+      await documentClient
+        .update({
+          TableName: process.env.COMMITS_TABLE,
+          Key: {
+            pk: `${userId}#${organizationName.trim().toLowerCase()}#${repoName
+              .trim()
+              .toLowerCase()}`,
+          },
+          UpdateExpression:
+            "SET #commitCount = :commitCount, #organizationName = :organizationName, #repoName = :repoName, #username = :username",
+          ExpressionAttributeNames: {
+            "#commitCount": "commitCount",
+            "#organizationName": "organizationName",
+            "#repoName": "repoName",
+            "#username": "username",
+          },
+          ExpressionAttributeValues: {
+            ":commitCount": commitCount,
+            ":organizationName": organizationName,
+            ":repoName": repoName,
+            ":username": userId,
+          },
+        })
+        .promise();
+    }
+  );
+
+  await Promise.all(promises);
+};
+
+export const getCommitSummary = async (
+  username: string,
+  organizationName: string,
+  responseQueue: string
+) => {
+  const documentClient = new aws.DynamoDB.DocumentClient({
+    region: process.env.AWS_REGION || "ap-southeast-1",
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS,
+  });
+
+  const { Items = [] } = await documentClient
+    .query({
+      TableName: process.env.COMMITS_TABLE,
+      IndexName: "by-username",
+      KeyConditionExpression:
+        "#username = :username AND #organizationName = :organizationName",
+      ExpressionAttributeNames: {
+        "#username": "username",
+        "#organizationName": "organizationName",
+      },
+      ExpressionAttributeValues: {
+        ":username": username,
+        ":organizationName": organizationName,
+      },
+      Limit: 1,
+    })
+    .promise();
+
+  server.getChannels().consumer.sendToQueue(
+    responseQueue,
+    Buffer.from(
+      JSON.stringify({
+        commits: Items[0] || { commitCount: 0, organizationName, username },
+      })
+    )
+  );
 };

@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { commenceSchedule, getHome, health } from "./functions";
+import { getHome, health, ping } from "./functions";
 
 const routes = Router();
 
 routes.get("/", getHome);
 routes.get("/health", health);
-routes.post("/schedule", commenceSchedule);
+routes.get("/ping", ping);
 
 export default routes;

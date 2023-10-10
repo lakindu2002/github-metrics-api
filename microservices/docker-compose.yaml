@@ -1,32 +1,63 @@
 version: "3"
 services:
+  rabbitmq:
+    image: "rabbitmq:3.12-management"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+
   developer_iq_commits:
     build:
       context: ./commits-service
       dockerfile: Dockerfile
     ports:
       - "3002:3002"
+    depends_on:
+      - rabbitmq
+
   developer_iq_issues:
     build:
       context: ./issues-service
       dockerfile: Dockerfile
     ports:
       - "3004:3004"
+    depends_on:
+      - rabbitmq
+
   developer_iq_pulls:
     build:
       context: ./pull-requests-service
       dockerfile: Dockerfile
     ports:
       - "3003:3003"
+    depends_on:
+      - rabbitmq
+
   developer_iq_repos:
     build:
       context: ./repositories-service
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    depends_on:
+      - rabbitmq
+
   developer_iq_scheduler:
     build:
       context: ./scheduler-service
       dockerfile: Dockerfile
     ports:
       - "3001:3001"
+    depends_on:
+      - rabbitmq
+  developer_iq_consumer:
+    build:
+      context: ./consumer-service
+      dockerfile: Dockerfile
+    ports:
+      - "3006:3006"
+    depends_on:
+      - rabbitmq

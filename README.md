@@ -32,8 +32,7 @@ To build the containers, you will need to use Docker and Docker Compose.
 Open the Microservice directory in terminal and run the commands:
 
 ```
-chmod +x script.sh
-./script.sh
+chmod +x script.sh && ./script.sh
 ```
 
 ### Step 02 - Docker Compose
