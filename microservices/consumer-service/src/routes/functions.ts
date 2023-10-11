@@ -1,7 +1,13 @@
 import server from "@consumer/server";
-import { Channel, ConsumeMessage } from "amqplib";
 import axios from "axios";
-import { Request, Response } from "express";
+import { Request, Response, response } from "express";
+import {
+  consumeCommitsMetrics,
+  consumeIssuesMetrics,
+  consumePullsMetrics,
+  processResponse,
+  sendMessage,
+} from "@consumer/utils";
 
 export const getHome = (_req: Request, resp: Response) => {
   return resp.json({ message: "hello from schedule service!" });
@@ -22,47 +28,46 @@ export const getProductivityPerUsernameInOrg = async (
 ) => {
   const { username, organizationName } = req.params;
 
-  const numResponsesExpected = 3;
-  let responsesReceived = 0;
-  const allResponses: any = [];
+  const { connection } = server.getChannels();
 
-  const handleResponse = (msg: ConsumeMessage) => {
-    const response = JSON.parse(msg.content.toString());
-    responsesReceived++;
-    console.log("RESPONSE - ", response, responsesReceived);
-    allResponses.push(response);
+  const commits = await connection.createChannel();
+  await commits.assertQueue("COMMITS");
 
-    if (responsesReceived === numResponsesExpected) {
-      console.log("ALL RESPONSES RECEIVED", allResponses);
-      res.json({ status: "HEALTHY", responses: allResponses });
-    }
-  };
+  const issues = await connection.createChannel();
+  await issues.assertQueue("ISSUES");
 
-  server.getChannels().consumer.consume("CONSUMER", handleResponse, {
-    noAck: true,
+  const pulls = await connection.createChannel();
+  await pulls.assertQueue("PULLS");
+
+  sendMessage(commits, "COMMITS", {
+    username,
+    orgName: organizationName,
+  });
+  sendMessage(issues, "ISSUES", {
+    username,
+    orgName: organizationName,
+  });
+  sendMessage(pulls, "PULLS", {
+    username,
+    orgName: organizationName,
   });
 
-  const sendMessage = async (channel: Channel, queueName: string) => {
-    channel.sendToQueue(
-      queueName,
-      Buffer.from(
-        JSON.stringify({
-          type: "GET_METRICS",
-          username,
-          orgName: organizationName,
-        })
-      ),
-      {
-        replyTo: "CONSUMER",
-      }
-    );
-  };
+  const [commitsMetrics, issuesMetrics, pullMetrics] = await Promise.all([
+    consumeCommitsMetrics(),
+    consumeIssuesMetrics(),
+    consumePullsMetrics(),
+  ]);
+  await commits.close();
+  await issues.close();
+  await pulls.close();
 
-  // Send messages to different queues
-  const { commits, issues, pulls } = server.getChannels();
-  await sendMessage(commits, "COMMITS");
-  await sendMessage(issues, "ISSUES");
-  await sendMessage(pulls, "PULLS");
+  const response = processResponse(
+    organizationName,
+    username,
+    (commitsMetrics as any).commits,
+    (pullMetrics as any).pulls,
+    (issuesMetrics as any).issues
+  );
 
-  console.log("MESSAGES SENT AND AWAITING RESPONSES");
+  res.json({ productivity: response });
 };

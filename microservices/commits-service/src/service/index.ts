@@ -121,8 +121,7 @@ export const handleCreateCommits = async (
 
 export const getCommitSummary = async (
   username: string,
-  organizationName: string,
-  responseQueue: string
+  organizationName: string
 ) => {
   const documentClient = new aws.DynamoDB.DocumentClient({
     region: process.env.AWS_REGION || "ap-southeast-1",
@@ -148,11 +147,12 @@ export const getCommitSummary = async (
     })
     .promise();
 
-  server.getChannels().consumer.sendToQueue(
-    responseQueue,
+  server.getChannels().metrics.sendToQueue(
+    "COMMITS_METRICS",
     Buffer.from(
       JSON.stringify({
         commits: Items[0] || { commitCount: 0, organizationName, username },
+        type: "METRICS",
       })
     )
   );

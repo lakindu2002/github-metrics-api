@@ -158,8 +158,7 @@ export const handleCompileIssues = async (
 
 export const handleGetIssuesSummary = async (
   orgName: string,
-  username: string,
-  responseQueue: string
+  username: string
 ) => {
   const documentClient = new aws.DynamoDB.DocumentClient({
     region: process.env.AWS_REGION || "ap-southeast-1",
@@ -189,8 +188,8 @@ export const handleGetIssuesSummary = async (
 
   server
     .getChannels()
-    .consumer.sendToQueue(
-      responseQueue,
-      Buffer.from(JSON.stringify({ issues: metric }))
+    .metrics.sendToQueue(
+      "ISSUES_METRICS",
+      Buffer.from(JSON.stringify({ issues: metric, type: "METRICS" }))
     );
 };

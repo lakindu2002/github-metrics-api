@@ -5,7 +5,7 @@ import amqp from "amqplib";
 export class Server {
   private server: express.Express;
   private issuesChannel: amqp.Channel;
-  private consumerChannel: amqp.Channel;
+  private issuesMetrics: amqp.Channel;
 
   constructor() {
     this.server = express();
@@ -16,7 +16,7 @@ export class Server {
   getChannels() {
     return {
       issues: this.issuesChannel,
-      consumer: this.consumerChannel,
+      metrics: this.issuesMetrics,
     };
   }
 
@@ -36,10 +36,10 @@ export class Server {
     const amqpServer = process.env.RABBITMQ_URL;
     const connection = await amqp.connect(amqpServer);
     this.issuesChannel = await connection.createChannel();
-    this.consumerChannel = await connection.createChannel();
+    this.issuesMetrics = await connection.createChannel();
 
     await this.issuesChannel.assertQueue("ISSUES");
-    await this.consumerChannel.assertQueue("CONSUMER");
+    await this.issuesMetrics.assertQueue("ISSUES_METRICS");
   }
 
   startServer(port: number = (process.env.PORT as unknown as number) || 3002) {

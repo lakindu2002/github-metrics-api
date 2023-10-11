@@ -2,40 +2,40 @@ import server from "./server";
 import { handleCreateCommits, getCommitSummary } from "./service";
 
 require("dotenv").config();
+setTimeout(() => {
+  server
+    .startRabbitMq()
+    .then(() => {
+      console.log("STARTED RABBIT MQ FOR COMMITS SERVICE");
+      server.getChannels().commits.consume("COMMITS", (message) => {
+        const { type, name, orgName, username } = JSON.parse(
+          message.content.toString()
+        );
 
-server
-  .startRabbitMq()
-  .then(() => {
-    console.log("STARTED RABBIT MQ FOR COMMITS SERVICE");
-    server.getChannels().commits.consume("COMMITS", (message) => {
-      const { type, name, orgName, username } = JSON.parse(
-        message.content.toString()
-      );
+        if (type === "COMPILE_COMMITS") {
+          handleCreateCommits(orgName, name)
+            .then(() => {
+              console.log("COMPILED COMMITS");
+            })
+            .catch(() => {
+              console.log("FAILED TO COMPILE COMMITS");
+            });
+        } else if (type === "GET_METRICS") {
+          getCommitSummary(username, orgName)
+            .then(() => {
+              console.log("COMMITS METRICS SENT");
+            })
+            .catch(() => {
+              console.log("COMMITS METRICS FAILED");
+            });
+        }
 
-      if (type === "COMPILE_COMMITS") {
-        handleCreateCommits(orgName, name)
-          .then(() => {
-            console.log("COMPILED COMMITS");
-          })
-          .catch(() => {
-            console.log("FAILED TO COMPILE COMMITS");
-          });
-      } else if (type === "GET_METRICS") {
-        const {
-          properties: { replyTo },
-        } = message;
-        getCommitSummary(username, orgName, replyTo)
-          .then(() => {
-            console.log("COMMITS METRICS SNT");
-          })
-          .catch(() => {
-            console.log("COMMITS METRICS FAILED");
-          });
-      }
+        server.getChannels().commits.ack(message);
+      });
+    })
+    .catch((err) => {
+      console.log("FAILED TO START RABBIT MQ FOR COMMITS SERVIE", err);
     });
-  })
-  .catch((err) => {
-    console.log("FAILED TO START RABBIT MQ FOR COMMITS SERVIE", err);
-  });
+}, 10000);
 
 server.startServer();
