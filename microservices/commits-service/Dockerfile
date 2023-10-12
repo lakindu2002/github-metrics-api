@@ -7,11 +7,6 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-ENV RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/%2F
-ENV AWS_ACCESS_KEY=AKIA5SAWUVKQJJMI66PG
-ENV AWS_SECRET_ACCESS=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
-ENV COMMITS_TABLE=IacStackDynamoStackE396051D-commits8C56C0A9-11C8CDQXPR5AW
-
 # Install application dependencies and build (creates a separate layer)
 RUN npm install --legacy-peer-deps
 

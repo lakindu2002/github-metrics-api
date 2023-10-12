@@ -2,10 +2,14 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 
 export class DynamoStack extends cdk.Stack {
+  public readonly pullsTable: cdk.aws_dynamodb.Table;
+  public readonly commitsTable: cdk.aws_dynamodb.Table;
+  public readonly issuesTable: cdk.aws_dynamodb.Table;
+
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const pullsTable = new cdk.aws_dynamodb.Table(this, "pulls", {
+    this.pullsTable = new cdk.aws_dynamodb.Table(this, "pulls", {
       partitionKey: {
         name: "pk",
         type: cdk.aws_dynamodb.AttributeType.STRING,
@@ -13,7 +17,7 @@ export class DynamoStack extends cdk.Stack {
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
-    pullsTable.addGlobalSecondaryIndex({
+    this.pullsTable.addGlobalSecondaryIndex({
       indexName: "by-username",
       partitionKey: {
         name: "username",
@@ -26,7 +30,7 @@ export class DynamoStack extends cdk.Stack {
       projectionType: cdk.aws_dynamodb.ProjectionType.ALL,
     });
 
-    const commitsTable = new cdk.aws_dynamodb.Table(this, "commits", {
+    this.commitsTable = new cdk.aws_dynamodb.Table(this, "commits", {
       partitionKey: {
         name: "pk",
         type: cdk.aws_dynamodb.AttributeType.STRING,
@@ -34,7 +38,7 @@ export class DynamoStack extends cdk.Stack {
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
-    commitsTable.addGlobalSecondaryIndex({
+    this.commitsTable.addGlobalSecondaryIndex({
       indexName: "by-username",
       partitionKey: {
         name: "username",
@@ -47,7 +51,7 @@ export class DynamoStack extends cdk.Stack {
       projectionType: cdk.aws_dynamodb.ProjectionType.ALL,
     });
 
-    const issuesTable = new cdk.aws_dynamodb.Table(this, "issues", {
+    this.issuesTable = new cdk.aws_dynamodb.Table(this, "issues", {
       partitionKey: {
         name: "pk",
         type: cdk.aws_dynamodb.AttributeType.STRING,
@@ -55,7 +59,7 @@ export class DynamoStack extends cdk.Stack {
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
     });
 
-    issuesTable.addGlobalSecondaryIndex({
+    this.issuesTable.addGlobalSecondaryIndex({
       indexName: "by-username",
       partitionKey: {
         name: "username",
@@ -69,17 +73,17 @@ export class DynamoStack extends cdk.Stack {
     });
 
     new cdk.CfnOutput(this, "pullsTableName", {
-      value: pullsTable.tableName,
+      value: this.pullsTable.tableName,
       exportName: "pullsTableName",
     });
 
     new cdk.CfnOutput(this, "commitsTableName", {
-      value: commitsTable.tableName,
+      value: this.commitsTable.tableName,
       exportName: "commitsTableName",
     });
 
     new cdk.CfnOutput(this, "issuesTableName", {
-      value: issuesTable.tableName,
+      value: this.issuesTable.tableName,
       exportName: "issuesTableName",
     });
   }

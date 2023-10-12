@@ -10,15 +10,10 @@ COPY package*.json ./
 # Install application dependencies and build (creates a separate layer)
 RUN npm install --legacy-peer-deps
 
-ENV ORG_NAME=lodash
-ENV RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/%2F
-ENV AWS_ACCESS_KEY=AKIA5SAWUVKQJJMI66PG
-ENV AWS_SECRET_ACCESS=ZzcZSSs3TnpepETXZzvXxWO3B6zMN3OqFLDxjR95
-
 COPY dist .
 
 # Expose the port the app runs on
-EXPOSE 3002
+EXPOSE 3001
 
 # Define the command to run your application
 CMD ["node", "index.js"]

@@ -10,12 +10,10 @@ COPY package*.json ./
 # Install application dependencies and build (creates a separate layer)
 RUN npm install --legacy-peer-deps
 
-ENV RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/%2F
-
 COPY dist .
 
 # Expose the port the app runs on
-EXPOSE 3002
+EXPOSE 3006
 
 # Define the command to run your application
 CMD ["node", "index.js"]

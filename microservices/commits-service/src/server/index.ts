@@ -34,6 +34,7 @@ export class Server {
 
   async startRabbitMq() {
     const amqpServer = process.env.RABBITMQ_URL;
+    console.log("CONNECTION URL: " + amqpServer);
     const connection = await amqp.connect(amqpServer);
     this.commitsChannel = await connection.createChannel();
     this.commitsMetrics = await connection.createChannel();

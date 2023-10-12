@@ -7,18 +7,13 @@ WORKDIR /usr/src/app
 # Copy package.json and package-lock.json to the working directory
 COPY package*.json ./
 
-ENV RABBITMQ_URL=ENV RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/%2F
-ENV AWS_ACCESS_KEY=AKIA5SAWUVKQJJMI66PG
-ENV AWS_SECRET_ACCESS=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
-ENV ISSUES_TABLE=IacStackDynamoStackE396051D-issuesA71BD65A-TKGCQUI40GJD
-
 # Install application dependencies and build (creates a separate layer)
 RUN npm install --legacy-peer-deps
 
 COPY dist .
 
 # Expose the port the app runs on
-EXPOSE 3002
+EXPOSE 3004
 
 # Define the command to run your application
 CMD ["node", "index.js"]
