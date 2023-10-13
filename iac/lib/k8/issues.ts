@@ -4,13 +4,15 @@ import { Construct } from "constructs";
 interface IssuesStackProps extends cdk.StackProps {
   cluster: cdk.aws_eks.FargateCluster;
   issuesTableName: string;
+  accessKey: string;
+  secretAccessKey: string;
 }
 
 export class IssuesStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: IssuesStackProps) {
     super(scope, id, props);
 
-    const { cluster, issuesTableName } = props;
+    const { cluster, issuesTableName, accessKey, secretAccessKey } = props;
 
     cluster.addManifest("IssuesDeployment", {
       apiVersion: "apps/v1",
@@ -47,6 +49,14 @@ export class IssuesStack extends cdk.Stack {
                   {
                     name: "RABBITMQ_URL",
                     value: "amqp://guest:guest@rabbitmq-service.default:5672",
+                  },
+                  {
+                    name: "AWS_ACCESS_KEY",
+                    value: accessKey,
+                  },
+                  {
+                    name: "AWS_SECRET_ACCESS",
+                    value: secretAccessKey,
                   },
                 ],
               },

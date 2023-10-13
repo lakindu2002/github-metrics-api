@@ -25,8 +25,9 @@ setTimeout(() => {
             .then(() => {
               console.log("COMMITS METRICS SENT");
             })
-            .catch(() => {
+            .catch((err) => {
               console.log("COMMITS METRICS FAILED");
+              console.log(err);
             });
         }
 

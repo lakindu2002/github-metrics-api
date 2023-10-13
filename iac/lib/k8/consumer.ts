@@ -3,13 +3,15 @@ import { Construct } from "constructs";
 
 interface ConsumerStackProps extends cdk.StackProps {
   cluster: cdk.aws_eks.FargateCluster;
+  accessKey: string;
+  secretAccessKey: string;
 }
 
 export class ConsumerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ConsumerStackProps) {
     super(scope, id, props);
 
-    const { cluster } = props;
+    const { cluster, secretAccessKey, accessKey } = props;
 
     cluster.addManifest("ConsumerDeployment", {
       apiVersion: "apps/v1",
@@ -41,6 +43,14 @@ export class ConsumerStack extends cdk.Stack {
                   {
                     name: "RABBITMQ_URL",
                     value: "amqp://guest:guest@rabbitmq-service.default:5672",
+                  },
+                  {
+                    name: "AWS_ACCESS_KEY",
+                    value: accessKey,
+                  },
+                  {
+                    name: "AWS_SECRET_ACCESS",
+                    value: secretAccessKey,
                   },
                 ],
               },

@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { KubectlV26Layer } from "@aws-cdk/lambda-layer-kubectl-v26";
 import { Construct } from "constructs";
 import { RabbitMqK8Stack } from "../k8/rabbitmq";
 import { CommitsStack } from "../k8/commits";
@@ -7,20 +8,22 @@ import { ConsumerStack } from "../k8/consumer";
 import { PullsStack } from "../k8/pulls";
 import { ReposStack } from "../k8/repos";
 import { SchedulerStack } from "../k8/scheduler";
+import { IngressStack } from "../k8/ingress";
 
 interface EksStackProps extends cdk.StackProps {
-  tables: { commits: string; pulls: string; issues: string };
+  tableNames: { commits: string; pulls: string; issues: string };
+  iam: { secret: string; access: string };
 }
 
 export class EksStack extends cdk.Stack {
   public readonly cluster: cdk.aws_eks.FargateCluster;
-  private readonly ingressControllerName = "ingress-controller";
 
   constructor(scope: Construct, id: string, props: EksStackProps) {
     super(scope, id, props);
 
     const {
-      tables: { commits, issues, pulls },
+      tableNames: { commits, issues, pulls },
+      iam: { access, secret },
     } = props;
 
     const masterRole = new cdk.aws_iam.Role(this, "MasterRole", {
@@ -48,7 +51,16 @@ export class EksStack extends cdk.Stack {
     this.cluster = new cdk.aws_eks.FargateCluster(this, "DeveloperIQ", {
       version: cdk.aws_eks.KubernetesVersion.V1_26,
       clusterName: "DeveloperIQ",
+      kubectlLayer: new KubectlV26Layer(this, "Kubectlv26Layer"),
       mastersRole: masterRole,
+      albController: {
+        version: cdk.aws_eks.AlbControllerVersion.V2_5_1,
+        repository:
+          "602401143452.dkr.ecr.us-west-2.amazonaws.com/amazon/aws-load-balancer-controller",
+      },
+      outputClusterName: true,
+      outputConfigCommand: true,
+      outputMastersRoleArn: true,
       clusterLogging: [
         cdk.aws_eks.ClusterLoggingTypes.API,
         cdk.aws_eks.ClusterLoggingTypes.AUDIT,
@@ -114,15 +126,6 @@ export class EksStack extends cdk.Stack {
       ],
     });
 
-    const ingressControllerChart = this.cluster.addHelmChart(
-      "IngressController",
-      {
-        chart: "nginx-ingress",
-        repository: "https://helm.nginx.com/stable",
-        release: this.ingressControllerName, // Make service name predictable
-      }
-    );
-
     const rabbitMqStack = new RabbitMqK8Stack(this, "RabbbitMqStack", {
       ...props,
       cluster: this.cluster,
@@ -132,6 +135,8 @@ export class EksStack extends cdk.Stack {
       ...props,
       cluster: this.cluster,
       commitTable: commits,
+      accessKey: access,
+      secretAccessKey: secret,
     });
     commitsStack.addDependency(rabbitMqStack);
 
@@ -139,6 +144,8 @@ export class EksStack extends cdk.Stack {
       ...props,
       cluster: this.cluster,
       issuesTableName: issues,
+      accessKey: access,
+      secretAccessKey: secret,
     });
 
     issuesStack.addDependency(rabbitMqStack);
@@ -147,6 +154,8 @@ export class EksStack extends cdk.Stack {
       ...props,
       cluster: this.cluster,
       pullsTable: pulls,
+      accessKey: access,
+      secretAccessKey: secret,
     });
 
     pullsStack.addDependency(rabbitMqStack);
@@ -154,6 +163,8 @@ export class EksStack extends cdk.Stack {
     const consumerStack = new ConsumerStack(this, "ConsumerStack", {
       ...props,
       cluster: this.cluster,
+      accessKey: access,
+      secretAccessKey: secret,
     });
 
     consumerStack.addDependency(rabbitMqStack);
@@ -161,6 +172,8 @@ export class EksStack extends cdk.Stack {
     const reposStack = new ReposStack(this, "ReposStack", {
       ...props,
       cluster: this.cluster,
+      accessKey: access,
+      secretAccessKey: secret,
     });
 
     reposStack.addDependency(rabbitMqStack);
@@ -168,8 +181,17 @@ export class EksStack extends cdk.Stack {
     const schedulerStack = new SchedulerStack(this, "SchedulerStack", {
       ...props,
       cluster: this.cluster,
+      accessKey: access,
+      secretAccessKey: secret,
     });
 
     schedulerStack.addDependency(rabbitMqStack);
+
+    new IngressStack(this, "IngressStack", {
+      ...props,
+      cluster: this.cluster,
+      ports: { consumer: 3006 },
+      subnets: this.cluster.vpc.publicSubnets.map((subnet) => subnet.subnetId),
+    });
   }
 }

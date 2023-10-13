@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import { DynamoStack } from "./dynamodb";
 import { EksStack } from "./eks";
+import { IAMStack } from "./iam";
 
 export class IacStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,12 +12,25 @@ export class IacStack extends cdk.Stack {
 
     const { pullsTable, commitsTable, issuesTable } = dynamoDbStack;
 
-    new EksStack(this, "EksK8Stack", {
+    const iam = new IAMStack(this, "IAMStack", {
       ...props,
-      tables: {
+      tableArns: {
+        commits: commitsTable.tableArn,
+        issues: issuesTable.tableArn,
+        pulls: pullsTable.tableArn,
+      },
+    });
+
+    const eksStack = new EksStack(this, "EksK8Stack", {
+      ...props,
+      tableNames: {
         commits: commitsTable.tableName,
         issues: issuesTable.tableName,
         pulls: pullsTable.tableName,
+      },
+      iam: {
+        access: iam.accessKey.ref,
+        secret: iam.accessKey.attrSecretAccessKey,
       },
     });
   }

@@ -3,13 +3,15 @@ import { Construct } from "constructs";
 
 interface SchedulerStackProps extends cdk.StackProps {
   cluster: cdk.aws_eks.FargateCluster;
+  accessKey: string;
+  secretAccessKey: string;
 }
 
 export class SchedulerStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: SchedulerStackProps) {
     super(scope, id, props);
 
-    const { cluster } = props;
+    const { cluster, accessKey, secretAccessKey } = props;
 
     cluster.addManifest("ScheduleDeployment", {
       apiVersion: "apps/v1",
@@ -18,7 +20,7 @@ export class SchedulerStack extends cdk.Stack {
         name: "schedule-deployment",
       },
       spec: {
-        replicas: 2,
+        replicas: 1,
         selector: {
           matchLabels: {
             app: "schedule-service",
@@ -44,6 +46,14 @@ export class SchedulerStack extends cdk.Stack {
                   {
                     name: "RABBITMQ_URL",
                     value: "amqp://guest:guest@rabbitmq-service.default:5672",
+                  },
+                  {
+                    name: "AWS_ACCESS_KEY",
+                    value: accessKey,
+                  },
+                  {
+                    name: "AWS_SECRET_ACCESS",
+                    value: secretAccessKey,
                   },
                 ],
               },

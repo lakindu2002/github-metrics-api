@@ -4,13 +4,15 @@ import { Construct } from "constructs";
 interface PullsStackProps extends cdk.StackProps {
   cluster: cdk.aws_eks.FargateCluster;
   pullsTable: string;
+  accessKey: string;
+  secretAccessKey: string;
 }
 
 export class PullsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PullsStackProps) {
     super(scope, id, props);
 
-    const { cluster, pullsTable } = props;
+    const { cluster, pullsTable, secretAccessKey, accessKey } = props;
 
     cluster.addManifest("PullsDeployment", {
       apiVersion: "apps/v1",
@@ -47,6 +49,14 @@ export class PullsStack extends cdk.Stack {
                   {
                     name: "RABBITMQ_URL",
                     value: "amqp://guest:guest@rabbitmq-service.default:5672",
+                  },
+                  {
+                    name: "AWS_ACCESS_KEY",
+                    value: accessKey,
+                  },
+                  {
+                    name: "AWS_SECRET_ACCESS",
+                    value: secretAccessKey,
                   },
                 ],
               },

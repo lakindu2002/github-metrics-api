@@ -4,13 +4,15 @@ import { Construct } from "constructs";
 interface CommitsStackProps extends cdk.StackProps {
   cluster: cdk.aws_eks.FargateCluster;
   commitTable: string;
+  accessKey: string;
+  secretAccessKey: string;
 }
 
 export class CommitsStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: CommitsStackProps) {
     super(scope, id, props);
 
-    const { cluster, commitTable } = props;
+    const { cluster, commitTable, secretAccessKey, accessKey } = props;
 
     cluster.addManifest("CommitsDeployment", {
       apiVersion: "apps/v1",
@@ -47,6 +49,14 @@ export class CommitsStack extends cdk.Stack {
                   {
                     name: "RABBITMQ_URL",
                     value: "amqp://guest:guest@rabbitmq-service.default:5672",
+                  },
+                  {
+                    name: "AWS_ACCESS_KEY",
+                    value: accessKey,
+                  },
+                  {
+                    name: "AWS_SECRET_ACCESS",
+                    value: secretAccessKey,
                   },
                 ],
               },
