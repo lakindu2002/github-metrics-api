@@ -195,7 +195,7 @@ export class EksStack extends cdk.Stack {
     });
 
     if (this.cluster.albController) {
-      ingress .node.addDependency(this.cluster.albController);
+      ingress.node.addDependency(this.cluster.albController);
     }
   }
 }
