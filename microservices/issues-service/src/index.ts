@@ -39,6 +39,6 @@ setTimeout(() => {
     .catch(() => {
       console.log("FAILED TO STARTED RABBIT MQ FOR ISSUES");
     });
-}, 10000);
+}, (process.env.MQ_TIMER as unknown as number) || 10000);
 
 server.startServer(port);

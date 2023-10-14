@@ -55,6 +55,18 @@ export class SchedulerStack extends cdk.Stack {
                     name: "AWS_SECRET_ACCESS",
                     value: secretAccessKey,
                   },
+                  {
+                    name: "CRON_EXPRESSON",
+                    value: "*/5 * * * *",
+                  },
+                  {
+                    name: "RATE_COUNT",
+                    value: 100,
+                  },
+                  {
+                    name: "MQ_TIMER",
+                    value: 30000,
+                  },
                 ],
               },
             ],

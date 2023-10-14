@@ -187,11 +187,15 @@ export class EksStack extends cdk.Stack {
 
     schedulerStack.addDependency(rabbitMqStack);
 
-    new IngressStack(this, "IngressStack", {
+    const ingress = new IngressStack(this, "IngressStack", {
       ...props,
       cluster: this.cluster,
       ports: { consumer: 3006 },
       subnets: this.cluster.vpc.publicSubnets.map((subnet) => subnet.subnetId),
     });
+
+    if (this.cluster.albController) {
+      ingress .node.addDependency(this.cluster.albController);
+    }
   }
 }

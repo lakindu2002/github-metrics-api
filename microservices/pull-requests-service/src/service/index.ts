@@ -17,6 +17,11 @@ export const createClosedPullRequestsPerUserInRepo = async (
 
   while (true) {
     try {
+      // process to avoid rates
+      if (page == (process.env.RATE_COUNT as unknown as number) || 100) {
+        break;
+      }
+
       const response = await axios.get<Pull[]>(pullRequestsUrl, {
         params: { state: "closed", page, per_page: 100 },
       });

@@ -8,7 +8,9 @@ require("dotenv").config();
 const port = (process.env.PORT as unknown as number) || 3001;
 const orgName = process.env.ORG_NAME;
 
-cron.schedule("0 0 * * *", (): void => {
+const scheduleExpression = process.env.CRON_EXPRESSON || "0 0 * * *";
+
+cron.schedule(scheduleExpression, (): void => {
   console.log("COMMENCING SCHEDULE");
   pushScheduleJob(orgName);
 });
@@ -35,7 +37,7 @@ setTimeout(() => {
     .catch(() => {
       console.log("FAILED TO START RABBIT MQ FOR SCHEDULER SERVICE");
     });
-}, 10000);
+}, (process.env.MQ_TIMER as unknown as number) || 10000);
 
 console.log("SCHEDULE CREATED");
 

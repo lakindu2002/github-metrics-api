@@ -16,6 +16,11 @@ export const getCommitsInRepoInOrg = async (
 
   while (true) {
     try {
+      // process to avoid rates
+      if (page == (process.env.RATE_COUNT as unknown as number) || 100) {
+        break;
+      }
+
       const response = await axios.get(commitsUrl, {
         params: { page, per_page: 100 },
       });

@@ -53,6 +53,14 @@ export class ReposStack extends cdk.Stack {
                     name: "AWS_SECRET_ACCESS",
                     value: secretAccessKey,
                   },
+                  {
+                    name: "RATE_COUNT",
+                    value: 100,
+                  },
+                  {
+                    name: "MQ_TIMER",
+                    value: 30000,
+                  },
                 ],
               },
             ],

@@ -21,6 +21,6 @@ setTimeout(() => {
     .catch(() => {
       console.log("FAILED TO START RABBIT MQ FOR REPO SERVICE");
     });
-}, 10000);
+}, (process.env.MQ_TIMER as unknown as number) || 10000);
 
 server.startServer();
