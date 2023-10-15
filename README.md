@@ -18,14 +18,14 @@ Therefore, each component has been broken down in its own microservice:
 
 Apart from that, there are two more services that are built for this app:
 
-1. Scheduler Service: This service will run daily and collect data for a series of users
-An API Gateway will be provisioned to act as the ingress API.
+1. Scheduler Service: This service will run daily and collect data for all repositories assigned to a given org.
+2. Consumer Service: This service is implemented through the aggregator pattern to communicate to the Issues, Pulls, Commits service to fetch productivity metrics per username.
 
 ## Deployment
 
-To deploy the microservices, it will use Docker and Kubernetes. 
+To deploy the microservices, it will use Docker and Kubernetes.
 
-To build the containers, you will need to use Docker and Docker Compose. 
+To build the containers, you will need to use Docker and Docker Compose.
 
 ### Step 01 - Building Projects
 
@@ -37,4 +37,17 @@ chmod +x script.sh && ./script.sh
 
 ### Step 02 - Docker Compose
 
-After building each service directory, run `docker-compose up --build`. This will build the docker containers and spin the entire app up locally.
+After building each service directory, run `docker-compose up --build`. This will build the docker containers and spin the entire app up locally. Make sure you update the `Dockerfile` to add any env variables you'll need during local invocation. Refer to the `cdk/lib/k8` directory to see the env files you'll need to add during Docker Compose.
+
+### Step 03 - CDK Deployment
+
+Open the `cdk` directory and run `npm i`. This will install project dependencies that's needed for the project to function. Next, run `cdk bootstrap` to bootstrap a development environment. Next, run `cdk deploy`. This will provision the application.
+
+Head over to the EC2 console of the region you've deployed on, navigate to load balancers and access to app through the following endpoints:
+
+```
+- ALB_Public_DNS/
+- ALB_Public_DNS/ping
+- ALB_Public_DNS/health
+- ALB_Public_DNS/productivity/:orgName/:username
+```

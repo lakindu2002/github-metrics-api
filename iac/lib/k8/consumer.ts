@@ -54,11 +54,11 @@ export class ConsumerStack extends cdk.Stack {
                   },
                   {
                     name: "RATE_COUNT",
-                    value: 100,
+                    value: "100",
                   },
                   {
                     name: "MQ_TIMER",
-                    value: 30000,
+                    value: "30000",
                   },
                 ],
               },
