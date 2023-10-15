@@ -15,6 +15,7 @@ export class DynamoStack extends cdk.Stack {
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     this.pullsTable.addGlobalSecondaryIndex({
@@ -36,6 +37,7 @@ export class DynamoStack extends cdk.Stack {
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     this.commitsTable.addGlobalSecondaryIndex({
@@ -57,6 +59,7 @@ export class DynamoStack extends cdk.Stack {
         type: cdk.aws_dynamodb.AttributeType.STRING,
       },
       billingMode: cdk.aws_dynamodb.BillingMode.PAY_PER_REQUEST,
+      removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
 
     this.issuesTable.addGlobalSecondaryIndex({

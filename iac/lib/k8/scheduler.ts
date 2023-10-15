@@ -57,7 +57,7 @@ export class SchedulerStack extends cdk.Stack {
                   },
                   {
                     name: "CRON_EXPRESSON",
-                    value: "*/5 * * * *",
+                    value: "0 0 * * *",
                   },
                   {
                     name: "RATE_COUNT",

@@ -33,5 +33,8 @@ export class IacStack extends cdk.Stack {
         secret: iam.accessKey.attrSecretAccessKey,
       },
     });
+
+    eksStack.addDependency(dynamoDbStack);
+    eksStack.addDependency(iam);
   }
 }

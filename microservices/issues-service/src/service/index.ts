@@ -18,7 +18,7 @@ export const getOpenClosedIssuesInRepo = async (
   while (true) {
     try {
       // process to avoid rates
-      if (page == (process.env.RATE_COUNT as unknown as number) || 100) {
+      if (page === ((process.env.RATE_COUNT as unknown as number) || 100)) {
         break;
       }
 

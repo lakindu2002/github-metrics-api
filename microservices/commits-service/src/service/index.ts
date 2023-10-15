@@ -14,10 +14,13 @@ export const getCommitsInRepoInOrg = async (
   const allCommits: Commit[] = [];
   let page = 1;
 
+  console.log("STARTING TO COLLECT COMMITS", { organizationName, repoName });
+
   while (true) {
     try {
       // process to avoid rates
-      if (page == (process.env.RATE_COUNT as unknown as number) || 100) {
+      if (page === ((process.env.RATE_COUNT as unknown as number) || 100)) {
+        console.log("HITTING BREAK", { page });
         break;
       }
 
@@ -35,6 +38,8 @@ export const getCommitsInRepoInOrg = async (
       if (commits.length > 0) {
         allCommits.push(...commits);
         page++;
+
+        console.log("GATHERED DATA FOR A PAGE");
       } else {
         break; // No more pages, exit the loop
       }
@@ -42,6 +47,7 @@ export const getCommitsInRepoInOrg = async (
       // Check for the Link header for pagination information
       const linkHeader = response.headers.link;
       if (!linkHeader || !linkHeader.includes('rel="next"')) {
+        console.log("NO PAGINATION, EXITING");
         break; // No "next" link in the header, exit the loop
       }
     } catch (err) {
@@ -90,7 +96,7 @@ export const handleCreateCommits = async (
 
   const commits = await getCommitsInRepoInOrg(repoName, organizationName);
   const groupedByAuthor = groupBy(commits, (commit) => commit.authorId);
-
+  console.log({ name: process.env.COMMITS_TABLE });
   const promises = Object.entries(groupedByAuthor).map(
     async ([userId, commitsPerUser]) => {
       const commitCount = commitsPerUser.length;
@@ -118,10 +124,12 @@ export const handleCreateCommits = async (
           },
         })
         .promise();
+      return { userId, commitCount };
     }
   );
 
-  await Promise.all(promises);
+  const responses = await Promise.all(promises);
+  return responses;
 };
 
 export const getCommitSummary = async (

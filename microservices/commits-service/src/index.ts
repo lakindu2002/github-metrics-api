@@ -14,8 +14,8 @@ setTimeout(() => {
 
         if (type === "COMPILE_COMMITS") {
           handleCreateCommits(orgName, name)
-            .then(() => {
-              console.log("COMPILED COMMITS");
+            .then((resp) => {
+              console.log("COMPILED COMMITS", resp);
             })
             .catch(() => {
               console.log("FAILED TO COMPILE COMMITS");
