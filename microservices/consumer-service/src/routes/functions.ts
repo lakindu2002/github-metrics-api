@@ -10,7 +10,7 @@ import {
 } from "@consumer/utils";
 
 export const getHome = (_req: Request, resp: Response) => {
-  return resp.json({ message: "hello from schedule service!" });
+  return resp.json({ message: "hello from consumer service!" });
 };
 
 export const health = (_req: Request, res: Response) => {

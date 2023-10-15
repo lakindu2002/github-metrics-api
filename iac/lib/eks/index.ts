@@ -64,6 +64,9 @@ export class EksStack extends cdk.Stack {
       clusterLogging: [
         cdk.aws_eks.ClusterLoggingTypes.API,
         cdk.aws_eks.ClusterLoggingTypes.AUDIT,
+        cdk.aws_eks.ClusterLoggingTypes.AUTHENTICATOR,
+        cdk.aws_eks.ClusterLoggingTypes.CONTROLLER_MANAGER,
+        cdk.aws_eks.ClusterLoggingTypes.SCHEDULER,
       ],
     });
 
